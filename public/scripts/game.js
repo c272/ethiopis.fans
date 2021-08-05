@@ -11,6 +11,9 @@ const DEBUG_ENABLED = true;
 //The current room we're in.
 var roomID = null;
 
+//The players in the current room.
+var players = null;
+
 ////////////////////////
 /// HELPER FUNCTIONS ///
 ////////////////////////
@@ -44,6 +47,9 @@ else {
 /// SOCKET RESPONSES ///
 ////////////////////////
 
+// SECTION 1
+// LOBBY SOCKET RESPONSES
+
 //Triggered when a new room has been joined.
 socket.on("roomJoined", (room) => {
 
@@ -51,6 +57,7 @@ socket.on("roomJoined", (room) => {
     debug("Joined new room '" + room.name + "'.");
     window.history.replaceState({}, "ethiopis.fans - The Online Drawing Game", "/room/" + room.name);
     roomID = room.name;
+    players = room.players;
 
     //Show the lobby screen.
     showLayer("lobbyScreen");
@@ -61,8 +68,9 @@ socket.on("roomJoined", (room) => {
         lobbySettings.removeAttribute("disabled");
     }
 
-    //Set up the form values.
-    updateLobbyForm(room.settings);
+    //Set up the form values, player list.
+    updateLobbySettings(room.settings);
+    updateLobbyPlayers(room.players);
 });
 
 //Triggered when the owner of the current room has changed.
@@ -71,14 +79,49 @@ socket.on("ownerChanged", (ownerId) => {
     //Are we the new owner? If so, enable the form.
     if (ownerId == socket.id)
     {
+        debug("Inherited lobby owner status.");
         var lobbySettings = document.getElementById("lobbySettings");
         lobbySettings.removeAttribute("disabled");
     }
-
 });
+
+//Triggered when settings/players change in the lobby.
+socket.on("lobbySettingsUpdate", (settings) => {
+    updateLobbySettings(settings);
+});
+socket.on("lobbyPlayerUpdate", (players) => {
+    debug("Updating lobby players...");
+    updateLobbyPlayers(players);
+});
+
+//Triggered when the user has successfully changed their name.
+socket.on("nameChangeSuccessful", (name) => {
+    //Set a browser-session cookie to save this name.
+    document.cookie = name;
+});
+
+//Triggered when transitioning from the lobby state to the game state.
+socket.on("gameStarting", () => {
+
+    //Switch layers to the main game.
+    debug("Starting main game! Transitioning to main layer.");
+    showLayer("mainScreen");
+});
+
+// SECTION 2
+// MAIN GAME SOCKET RESPONSES
+
+//todo
+
+// DEBUG SECTION
+// ERROR RESPONSES & ANALYSIS
 
 //Triggered when the server has hit an error.
 socket.on("error", (msg) => {
+    var errorDiv = document.getElementById("errorContents");
+    errorDiv.innerHTML = "<p>" + msg + "</p>";
+    var openError = document.getElementById("openErrorButton");
+    openError.click();
     debug("ERROR: " + msg);
 });
 
@@ -104,8 +147,9 @@ function showLayer(name)
     }
 }
 
-function updateLobbyForm(settings)
-{
+//Updates the displayed lobby settings values with data from the given room object.
+function updateLobbySettings(settings)
+{    
     //Get inputs.
     var roundsInput = document.getElementById("amtRounds");
     var drawingTime = document.getElementById("drawingTime");
@@ -119,8 +163,39 @@ function updateLobbyForm(settings)
     customWordsOnly.setAttribute("value", settings.customWordsOnly);
 }
 
+//Updates the state of all players in the lobby phase.
+function updateLobbyPlayers(players)
+{
+    //Get and set username box.
+    var usernameInput = document.getElementById("usernameInput");
+    usernameInput.setAttribute("value", players.find(x => x.id == socket.id).name);
+
+    //Clear all players from the player div.
+    var playerDiv = document.getElementById("playerDiv");
+    playerDiv.innerHTML = '';
+
+    //Add players.
+    for (var i=0; i<players.length; i++) {
+        var player = players[i];
+        var playerHTML = "<div class='playerPortrait'>";
+        playerHTML += "<img src='/images/player.png' style='width: 100px;'>";
+        playerHTML += "<p>" + player.name + "</p></div>";
+
+        //Push HTML.
+        playerDiv.innerHTML += playerHTML;
+    }
+}
+
 //Triggered when the lead user wants to start the game.
 function startGame()
 {
+    socket.emit("startGame", roomID);
+}
 
+//Triggered when the user wants to change their in-game name.
+function changeName()
+{
+    //Get the username from the input box, request it.
+    var username = document.getElementById("usernameInput").value.toString();
+    socket.emit("changeName", username);
 }

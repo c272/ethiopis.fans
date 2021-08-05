@@ -12,6 +12,22 @@ const io = new Server(server);
 //The directory that all views and scripts are stored in for the app.
 const __views = __dirname + "/views/";
 
+//A list of random words that are assigned as default usernames.
+const defaultUsernames = [
+    'Merasmus',
+    'Count Dinkleberry',
+    'Ethiopis',
+    'Kelly Snames',
+    'Raum',
+    'Gunrat',
+    'Tardis',
+    'Yewtree',
+    'Dreams',
+    'Nino Lass',
+    'Scom Tott',
+    'Killer Kingsmill'
+]
+
 //A list of rooms active in the current instance.
 var rooms = [];
 
@@ -59,6 +75,65 @@ io.on('connection', (socket) => {
             socket.emit('error', "Failed to join the room, does not exist.");
         }
     });
+
+    //Triggered when the user requests a change in username.
+    socket.on('changeName', (name) => {
+
+        //Does the name contain invalid characters?
+        var nameRegex = /^[ A-Za-z0-9\_!\"\+\&\(\)\.]{3,20}$/;
+        if (!nameRegex.test(name)) {
+            socket.emit('error', "Name contains invalid characters, or is too short/long.");
+            return;
+        }
+
+        //Find the room that this player is in.
+        var roomIndex = rooms.findIndex(x => x.players.findIndex(y => y.id == socket.id) != -1);
+        if (roomIndex == -1) { return; }
+        var room = rooms[roomIndex];
+
+        //Has the game started?
+        if (room.round != 0) {
+            socket.emit('error', "The game has already started, you can't change your name.");
+            return;
+        }
+
+        //Does it conflict with another player in the room?
+        if (room.players.findIndex(x => x.name == name) != -1) {
+            socket.emit('error', "Another player in the lobby already has that name!");
+            return;
+        }
+
+        //Change the player's name.
+        var player = room.players.find(x => x.id == socket.id);
+        player.name = name;
+        socket.emit("nameChangeSuccessful", name);
+        io.to(room.name).emit("lobbyPlayerUpdate", room.players);
+    });
+
+    //Triggered when a user wants to start a game.
+    socket.on('startGame', (roomName) => {
+        //Is that room name valid?
+        var roomIndex = rooms.findIndex(x => x.name == roomName);
+        if (roomIndex == -1) { return; }
+        var room = rooms[roomIndex];
+
+        //Is the user the lead user of their room?
+        if (room.owner != socket.id) { return; }
+
+        //Does the room have 2 or more people?
+        if (room.players.length < 2) {
+            socket.emit('error', "The room must have 2 or more people to start a game.");
+            return;
+        }
+
+        //Yes, is the game already started?
+        if (room.round != 0) { return; }
+
+        //Start round 1, emit the start game signal!
+        console.log("Game starting in room '" + room.name + "', " + room.settings.rounds + " rounds with " + room.players.length + " players.");
+        tickGame(room);
+        io.to(room.name).emit("gameStarting");
+    });
 });
 
 
@@ -99,8 +174,15 @@ function joinRoom(socket, name)
     //Add the person to the room.
     socket.join(name);
     rooms[roomIndex].playerCount++;
-    rooms[roomIndex].players.push(socket.id);
+    rooms[roomIndex].players.push({        
+        id: socket.id,
+        name:  defaultUsernames[Math.floor(Math.random()*defaultUsernames.length)],
+        points: 0
+    });
     console.log("User [" + socket.id + "] has joined room '" + name + "'.");
+
+    //Emit the player change to all users.
+    io.to(name).emit("lobbyPlayerUpdate", rooms[roomIndex].players);
     return true;
 }
 
@@ -114,10 +196,15 @@ function leaveRoom(socket, name)
     socket.leave(name);
     console.log("User [" + socket.id + "] has left room '" + name + "'.");
     
-    //Is the room empty and to be removed?
+    //Remove the player from the internal room representation.
     var room = rooms[roomIndex];
     room.playerCount--;
-    room.players.remove(socket.id);
+    var removeIndex = room.players.findIndex(x => x.id == socket.id);
+    if (removeIndex != -1) {
+        room.players.splice(removeIndex, 1);
+    }
+
+    //Is the room empty and to be removed?
     if (room.players.length <= 0)
     {
         //Remove it.
@@ -129,10 +216,13 @@ function leaveRoom(socket, name)
     //Transfer ownership (if required), room still exists.
     if (socket.id == room.owner)
     {
-        room.owner = room.players[0];
+        room.owner = room.players[0].id;
         console.log("Transferred ownership of room '" + room.name + "' to user [" + room.owner + "].");
         io.to(room.name).emit("ownerChanged", room.owner);
     }
+
+    //Emit the player change to all users.
+    io.to(name).emit("lobbyPlayerUpdate", rooms[roomIndex].players);
     return true;
 }
 
@@ -157,10 +247,40 @@ function createRoom(socket)
             drawingTime: 60,
             customWords: "",
             customWordsOnly: false
-        }
+        },
+        round: 0,
+        playerIndex: Number.MAX_SAFE_INTEGER
     });
     console.log("Created new room with ID '" + id + "'.");
     return id;
+}
+
+//Starts a new round for the given room.
+function tickGame(roomName)
+{
+    //Get the room.
+    var roomIndex = rooms.findIndex(x => x.name == roomName);
+    if (roomIndex == -1) { return; }
+    var room = rooms[roomIndex];
+
+    //Have we done all the players yet?
+    if (room.playerIndex < room.players.length) {
+        room.playerIndex++;
+    }
+    else {
+        //End of the round, tick round and reset index.
+        room.round++;
+        room.playerIndex = 0;
+    }
+
+    //Have we finished the game altogether?
+    if (room.round > room.settings.rounds)
+    {
+        //todo
+        console.log("GAME HAS ENDED");
+    }
+
+    //todo: round logic
 }
 
 /////////////////////////
