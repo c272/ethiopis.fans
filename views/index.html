@@ -1,0 +1,83 @@
+<!-- ethiopis.fans, (c) C272 2021 -->
+<html>
+    <head>
+        <title>ethiopis.fans - The Online Drawing Game</title>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/scripts/game.js"></script>
+        <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/game.css">
+    </head>
+    <body>
+        <!-- "Connecting..." screen. -->
+        <div class="gameLayer onTopLayer" id="connectingScreen">
+            <div class="centered" style="text-align: center;">
+                <h1>Connecting...</h1>
+                <p><i>Currently attempting to connect to the ethiopis.fans server.</i></p>
+            </div>
+        </div>
+
+        <!-- Lobby Screen-->
+        <div class="gameLayer" id="lobbyScreen">
+            <div class="centerHorizontal">
+                <img src="/images/logo.png" style="margin-top: 2em; width: 40%;">
+                <p><i>This is a random Minecraft-style quote!</i></p>
+                <br>
+                <div class="container" style="width: 60%">
+
+                    <!-- Title row. -->
+                    <div class="row">
+                        <div class="col align-items-center">
+                            <h2>Settings</h2>
+                        </div>
+                        <div class="col align-items-center">
+                            <h2>Players</h2>
+                        </div>
+                    </div>
+
+                    <!-- Content row. -->
+                    <div class="row" style="justify-content: left; text-align: left;">
+                        <!-- Settings. -->
+                        <div class="col align-items-left">
+                            <form>
+                                <fieldset id="lobbySettings" disabled="disabled">
+                                    <div class="mb-3">
+                                        <label for="amtRounds" class="form-label">Rounds</label>
+                                        <input type="number" class="form-control" id="amtRounds">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="drawingTime" class="form-label">Drawing Time</label>
+                                        <input type="number" class="form-control" id="drawingTime">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="customWords" class="form-label">Custom Words</label>
+                                        <textarea class="form-control" id="customWords" rows="3"></textarea>
+                                    </div>
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="customWordsOnly">
+                                        <label class="form-check-label" for="customWordsOnly">Use Custom Words Only</label>
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <button type="button" onclick="startGame()" class="btn btn-success btn-block">Start Game</button>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+
+                        <!-- Players. -->
+                        <div class="col align-items-left">
+                            <p>Todo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Game Screen -->
+        <div class="gameLayer" id="mainScreen">
+
+        </div>
+
+        <!-- Bootstrap includes. -->
+        <script src="/bootstrap/js/bootstrap.min.js"></script>
+    </body>
+</html>

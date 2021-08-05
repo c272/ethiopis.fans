@@ -1,0 +1,30 @@
+/* Stylesheet for the main ethiopis.fans game page. */
+/* ethiopis.fans (c) C272, 2021, All Rights Reserved */
+
+/* A single layer on the game page. */
+.gameLayer {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: white; /*todo: background image*/
+}
+
+/* Moves the attached layer to the top of the group. */
+.onTopLayer {
+    z-index: 10;
+}
+
+/* Centers a div both horizontally and vertically. */
+.centered {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+/* Centers a div and its contents horizontally. */
+.centerHorizontal {
+    justify-content: center; 
+    text-align: center;
+}
