@@ -86,7 +86,7 @@
 
     <!-- Main Game Screen -->
     <div class="gameLayer" id="mainScreen">
-        <div style="margin-left:10%; margin-right:10%; margin-top: 2em;">
+        <div class="mainGameWindow">
             <div class="container">
 
                  <!-- Logo row. -->
@@ -101,8 +101,8 @@
                     <div class="col-2">
                         <p>67s, Round 2/4</p>
                     </div>
-                    <div class="col-8 align-items-center">
-                        <p><b>_ _ _ _ _ _ _ _   _ _ _ _</b></p>
+                    <div class="col-8 d-flex flex-column" style="text-align: center; justify-content: center;">
+                        <p class="hangman"><b>_______ ____</b></p>
                     </div>
                 </div>
 
@@ -111,17 +111,23 @@
                     <div class="col-2 p-3" style="background-color: whitesmoke;">
                         <!-- player list here -->
                         <!-- implementation: https://getbootstrap.com/docs/4.0/components/list-group/#custom-content -->
-                        <ul class="list-group">
-                        </ul>
+                        <div id="playerList">
+                            
+                        </div>
                     </div>
-                    <div class="col-7 p-3">
+                    <div class="col-7">
                         <!-- canvas here -->
                         <!-- implementation details at:
                             https://github.com/socketio/socket.io/blob/master/examples/whiteboard/public/main.js
                         -->
+                        <canvas id="drawCanvas" class="drawCanvas" width="800" height="600"></canvas>
                     </div>
-                    <div class="col-3 p-3" style="background-color: whitesmoke;">
+                    <div class="col-3" style="background-color: whitesmoke; padding: 0;">
                         <!-- chat window here -->
+                        <div class="chatWindow">
+
+                        </div>
+                        <input class="form-control" style="height:34px;" placeholder="Type your guess here.">
                     </div>
                 </div>
 
