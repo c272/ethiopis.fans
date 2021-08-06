@@ -35,3 +35,7 @@
     text-align: center; 
     padding-right: 30px;
 }
+
+/* Pad/margin rules for the main game board. */
+.bottom-pad { margin-bottom: 0.5em; }
+.top-pad { margin-top: 0.5em; }

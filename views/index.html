@@ -86,7 +86,47 @@
 
     <!-- Main Game Screen -->
     <div class="gameLayer" id="mainScreen">
-        <marquee>Nuffink here yet</marquee>
+        <div style="margin-left:10%; margin-right:10%; margin-top: 2em;">
+            <div class="container">
+
+                 <!-- Logo row. -->
+                <div class="row bottom-pad">
+                    <div class="col">
+                        <img src="/images/logo.png" style="height:50px;">
+                    </div>
+                </div>
+
+                <!-- Timer & word blanks row. -->
+                <div class="row top-pad" style="background-color: whitesmoke;">
+                    <div class="col-2">
+                        <p>67s, Round 2/4</p>
+                    </div>
+                    <div class="col-8 align-items-center">
+                        <p><b>_ _ _ _ _ _ _ _   _ _ _ _</b></p>
+                    </div>
+                </div>
+
+                <!-- Players, canvas & chat row. -->
+                <div class="row top-pad">
+                    <div class="col-2 p-3" style="background-color: whitesmoke;">
+                        <!-- player list here -->
+                        <!-- implementation: https://getbootstrap.com/docs/4.0/components/list-group/#custom-content -->
+                        <ul class="list-group">
+                        </ul>
+                    </div>
+                    <div class="col-7 p-3">
+                        <!-- canvas here -->
+                        <!-- implementation details at:
+                            https://github.com/socketio/socket.io/blob/master/examples/whiteboard/public/main.js
+                        -->
+                    </div>
+                    <div class="col-3 p-3" style="background-color: whitesmoke;">
+                        <!-- chat window here -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <!-- Error modal. -->
